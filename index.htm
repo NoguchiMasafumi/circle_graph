@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.graph {
+  width: 804px;
+  height: 804px;
+}
+</style>
+</head>
+<body>
+<canvas id="js-graph" class="graph"></canvas>
+<script>
+const graph = document.getElementById('js-graph');
+const ctx = graph.getContext('2d');
+const gWidth = graph.clientWidth * 2;
+graph.width = gWidth;
+graph.height = gWidth;
+const gCenter = gWidth / 2;
+const gRadius = gCenter * 0.77;
+
+const schedule = [
+  [6.5, 8, '#f4ccccff', '朝食'],
+  [8, 11.5, '#a4c2f4ff', '勉強'],
+  [11.5, 12.5, '#b6d7a8ff', '昼食'],
+  [12.5, 14.5, '#a4c2f4ff', '勉強'],
+  [14.5, 15, '#fff2ccff', '休憩'],
+  [15, 15.5, '#b6d7a8ff', 'OYT'],
+  [15.5, 17.5, '#a4c2f4ff', '勉強'],
+  [17.5, 18, '#fff2ccff', '休憩'],
+  [18, 21.5, '#f4ccccff', 'Free']
+];
+
+function formatDurationWithH(start, end) {
+  const duration = end - start;
+  return duration + "H"; // 小数にHを付加
+}
+
+function drawPi(ctx, w, c, r, schedule) {
+  const data = new Array(1440).fill('#ccc');
+
+  schedule.forEach(item => {
+    const startMinutes = Math.floor(item[0]) * 60 + (item[0] % 1) * 60;
+    const endMinutes = Math.floor(item[1]) * 60 + (item[1] % 1) * 60;
+    const color = item[2];
+    for (let i = startMinutes; i < endMinutes; i++) {
+      data[i] = color;
+    }
+    const durationText = formatDurationWithH(item[0], item[1]); // formatDurationWithHを使用
+    item[3] = durationText + "<br>" + item[3];
+  });
+
+  // (以下略) 描画処理は変更なし
+    ctx.save();
+  for (let i = 0; i < 24; i++) {
+    const angleRad = (Math.PI / 12) * (i - 6);
+    const x = (c * 0.84) * Math.cos(angleRad) + c;
+    const y = (c * 0.84) * Math.sin(angleRad) + c;
+    const txtX = (c * 0.9) * Math.cos(angleRad) + c;
+    const txtY = (c * 0.9) * Math.sin(angleRad) + c;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(c, c);
+    ctx.closePath();
+    ctx.strokeStyle = ctx.fillStyle = '#000';
+    ctx.font = '18px din-condensed';
+    ctx.stroke();
+    ctx.fillText(String(i) + '時', txtX, txtY + 6);
+  }
+
+  ctx.save();
+  for (let i = 0; i < 1440; i++) {
+    ctx.beginPath();
+    ctx.arc(c, c, r, (Math.PI * 2 / 1440) * i - Math.PI / 2, (Math.PI * 2 / 1440) * (i + 1) - Math.PI / 2, false);
+    ctx.lineTo(c, c);
+    ctx.closePath();
+    ctx.strokeStyle = ctx.fillStyle = data[i];
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  schedule.forEach(item => {
+    const startAngle = (Math.PI * 2 / 1440) * (Math.floor(item[0]) * 60 + (item[0] % 1) * 60) - Math.PI / 2;
+    const endAngle = (Math.PI * 2 / 1440) * (Math.floor(item[1]) * 60 + (item[1] % 1) * 60) - Math.PI / 2;
+    const midAngle = (startAngle + endAngle) / 2;
+
+    const textX = c + (r * 0.6) * Math.cos(midAngle);
+    const textY = c + (r * 0.6) * Math.sin(midAngle);
+
+    ctx.fillStyle = '#000';
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const lines = item[3].split("<br>");
+    for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], textX, textY + i * 24);
+    }
+  });
+}
+
+drawPi(ctx, gWidth, gCenter, gRadius, schedule);
+</script>
+</body>
+</html>
