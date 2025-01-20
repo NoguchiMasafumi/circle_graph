@@ -84,8 +84,8 @@ function drawPi(ctx, w, c, r, schedule) {
     const endAngle = (Math.PI * 2 / 1440) * (Math.floor(item[1]) * 60 + (item[1] % 1) * 60) - Math.PI / 2;
     const midAngle = (startAngle + endAngle) / 2;
 
-    const textX = c + (r * 0.6) * Math.cos(midAngle);
-    const textY = c + (r * 0.6) * Math.sin(midAngle);
+    const textX = c + (r * 0.8) * Math.cos(midAngle);
+    const textY = c + (r * 0.8) * Math.sin(midAngle);
 
     ctx.fillStyle = '#000';
     ctx.font = '24px sans-serif';
