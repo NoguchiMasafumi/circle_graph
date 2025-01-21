@@ -19,20 +19,32 @@ graph.height = gWidth;
 const gCenter = gWidth / 2;
 const gRadius = gCenter * 0.77;
 
-const schedule = [
-    [6.5, 7.2, '#b6d7a8ff', '朝食'],
-    [7.2, 8, '#f4ccccff', 'Free'],
-    [8, 11.5, '#a4c2f4ff', '勉強'],
-    [11.5, 12.5, '#b6d7a8ff', '昼食'],
-    [12.5, 14.5, '#a4c2f4ff', '勉強'],
-    [14.5, 15, '#fff2ccff', 'Ent'],
-    [15, 15.5, '#b6d7a8ff', 'OYT'],
-    [15.5, 17.5, '#a4c2f4ff', '勉強'],
-    [17.5, 18, '#fff2ccff', 'Ent'],
-    [18, 21.5, '#f4ccccff', 'Free'],
-    [21.5, 6.5, '#CCCCCC', 'Good Night!!'], // 就寝
-];
+// URLパラメータを取得する関数
+function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+};
 
+// JSONファイルを読み込む関数
+function loadSchedule(charge, callback) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'json/' + charge + '.json', true); // jsonフォルダを指定
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            callback(JSON.parse(xhr.responseText));
+        } else {
+            console.error('JSONファイルの読み込みエラー');
+            callback(null); // エラー時はnullを返す
+        }
+    };
+    xhr.onerror = function() {
+        console.error('JSONファイルの読み込みエラー');
+        callback(null); // エラー時はnullを返す
+    };
+    xhr.send();
+}
 
 function calculateTimeByColor(schedule) {
     const colorTimes = {};
@@ -193,7 +205,21 @@ function drawPi(ctx, w, c, r, schedule) {
     drawColorSummary(ctx, colorTimes, 1450, 1300); // 右下あたりに配置
 }
 
-drawPi(ctx, gWidth, gCenter, gRadius, schedule);
+// URLパラメータを取得
+const charge = getUrlParameter('charge');
+
+// パラメータに基づいてJSONファイルを読み込み、グラフを描画
+if (charge) {
+    loadSchedule(charge, function(scheduleData) {
+        if (scheduleData) {
+            drawPi(ctx, gWidth, gCenter, gRadius, scheduleData);
+        } else {
+          // エラー処理：デフォルトのスケジュールを表示するか、エラーメッセージを表示するなど
+          alert("指定されたスケジュールが見つかりませんでした。");
+        }
+    });
+} else {
+}
 </script>
 </body>
 </html>
