@@ -116,13 +116,13 @@ function drawPi(ctx, w, c, r, schedule) {
         const txtX = (c * 0.9) * Math.cos(angleRad) + c;
         const txtY = (c * 0.9) * Math.sin(angleRad) + c;
         ctx.beginPath();
-        ctx.moveTo(x-10, y);
+        ctx.moveTo(x, y);
         ctx.lineTo(c, c);
         ctx.closePath();
         ctx.strokeStyle = ctx.fillStyle = '#000';
         ctx.font = '18px din-condensed';
         ctx.stroke();
-        ctx.fillText(String(i) + '時', txtX, txtY + 6);
+        ctx.fillText(String(i) + '時', txtX-20, txtY + 6);
     }
 
     ctx.save();
