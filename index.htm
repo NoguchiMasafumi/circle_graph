@@ -3,8 +3,8 @@
 <head>
 <style>
 .graph {
-  width: 804px;
-  height: 804px;
+    width: 804px;
+    height: 804px;
 }
 </style>
 </head>
@@ -20,83 +20,175 @@ const gCenter = gWidth / 2;
 const gRadius = gCenter * 0.77;
 
 const schedule = [
-  [6.5, 8, '#f4ccccff', '朝食'],
-  [8, 11.5, '#a4c2f4ff', '勉強'],
-  [11.5, 12.5, '#b6d7a8ff', '昼食'],
-  [12.5, 14.5, '#a4c2f4ff', '勉強'],
-  [14.5, 15, '#fff2ccff', '休憩'],
-  [15, 15.5, '#b6d7a8ff', 'OYT'],
-  [15.5, 17.5, '#a4c2f4ff', '勉強'],
-  [17.5, 18, '#fff2ccff', '休憩'],
-  [18, 21.5, '#f4ccccff', 'Free']
+    [6.5, 8, '#f4ccccff', '朝食'],
+    [8, 11.5, '#a4c2f4ff', '勉強'],
+    [11.5, 12.5, '#b6d7a8ff', '昼食'],
+    [12.5, 14.5, '#a4c2f4ff', '勉強'],
+    [14.5, 15, '#fff2ccff', 'Ent'],
+    [15, 15.5, '#b6d7a8ff', 'OYT'],
+    [15.5, 17.5, '#a4c2f4ff', '勉強'],
+    [17.5, 18, '#fff2ccff', 'Ent'],
+    [18, 21.5, '#f4ccccff', 'Free'],
+    [21.5, 6.5, '#CCCCCC', 'Good Night!!'], // 就寝
 ];
 
+
+function calculateTimeByColor(schedule) {
+    const colorTimes = {};
+
+    schedule.forEach(item => {
+        let startMinutes = Math.floor(item[0]) * 60 + Math.round((item[0] % 1) * 60);
+        let endMinutes = Math.floor(item[1]) * 60 + Math.round((item[1] % 1) * 60);
+        let durationMinutes = endMinutes - startMinutes;
+        if (durationMinutes < 0) {
+            durationMinutes += 1440; // 日付をまたぐ場合
+        }
+
+        const color = item[2];
+        if (!colorTimes[color]) {
+            colorTimes[color] = 0;
+        }
+        colorTimes[color] += durationMinutes;
+    });
+
+    return colorTimes;
+}
+
+function drawColorSummary(ctx, colorTimes, x, y) {
+    let currentY = y;
+    for (const color in colorTimes) {
+        const durationHours = colorTimes[color] / 60;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, currentY, 40, 30); // 色の四角を描画
+        ctx.fillStyle = '#000';
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(` = ${durationHours.toFixed(1)}H`, x + 40, currentY);
+        currentY += 40;
+    }
+}
+
+
+
+
+
 function formatDurationWithH(start, end) {
-  const duration = end - start;
-  return duration + "H"; // 小数にHを付加
+    let duration = end - start;
+    if (duration < 0) {
+        duration += 24;
+    }
+    return duration + "H";
 }
 
 function drawPi(ctx, w, c, r, schedule) {
-  const data = new Array(1440).fill('#ccc');
+    const data = new Array(1440).fill('#ccc');
 
-  schedule.forEach(item => {
-    const startMinutes = Math.floor(item[0]) * 60 + (item[0] % 1) * 60;
-    const endMinutes = Math.floor(item[1]) * 60 + (item[1] % 1) * 60;
-    const color = item[2];
-    for (let i = startMinutes; i < endMinutes; i++) {
-      data[i] = color;
-    }
-    const durationText = formatDurationWithH(item[0], item[1]); // formatDurationWithHを使用
-    item[3] = durationText + "<br>" + item[3];
-  });
+    schedule.forEach(item => {
+        let startMinutes = Math.floor(item[0]) * 60 + Math.round((item[0] % 1) * 60); // Math.roundを追加
+        let endMinutes = Math.floor(item[1]) * 60 + Math.round((item[1] % 1) * 60); // Math.roundを追加
+        const color = item[2];
 
-  // (以下略) 描画処理は変更なし
+        if (startMinutes > endMinutes) {
+            for (let i = startMinutes; i < 1440; i++) {
+                data[i] = color;
+            }
+            for (let i = 0; i < endMinutes; i++) {
+                data[i] = color;
+            }
+        } else {
+            for (let i = startMinutes; i < endMinutes; i++) {
+                data[i] = color;
+            }
+        }
+
+        const durationText = formatDurationWithH(item[0], item[1]);
+        item[3] = durationText + "<br>" + item[3];
+    });
+
     ctx.save();
-  for (let i = 0; i < 24; i++) {
-    const angleRad = (Math.PI / 12) * (i - 6);
-    const x = (c * 0.84) * Math.cos(angleRad) + c;
-    const y = (c * 0.84) * Math.sin(angleRad) + c;
-    const txtX = (c * 0.9) * Math.cos(angleRad) + c;
-    const txtY = (c * 0.9) * Math.sin(angleRad) + c;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(c, c);
-    ctx.closePath();
-    ctx.strokeStyle = ctx.fillStyle = '#000';
-    ctx.font = '18px din-condensed';
-    ctx.stroke();
-    ctx.fillText(String(i) + '時', txtX, txtY + 6);
-  }
-
-  ctx.save();
-  for (let i = 0; i < 1440; i++) {
-    ctx.beginPath();
-    ctx.arc(c, c, r, (Math.PI * 2 / 1440) * i - Math.PI / 2, (Math.PI * 2 / 1440) * (i + 1) - Math.PI / 2, false);
-    ctx.lineTo(c, c);
-    ctx.closePath();
-    ctx.strokeStyle = ctx.fillStyle = data[i];
-    ctx.fill();
-    ctx.stroke();
-  }
-
-  schedule.forEach(item => {
-    const startAngle = (Math.PI * 2 / 1440) * (Math.floor(item[0]) * 60 + (item[0] % 1) * 60) - Math.PI / 2;
-    const endAngle = (Math.PI * 2 / 1440) * (Math.floor(item[1]) * 60 + (item[1] % 1) * 60) - Math.PI / 2;
-    const midAngle = (startAngle + endAngle) / 2;
-
-    const textX = c + (r * 0.8) * Math.cos(midAngle);
-    const textY = c + (r * 0.8) * Math.sin(midAngle);
-
-    ctx.fillStyle = '#000';
-    ctx.font = '24px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    const lines = item[3].split("<br>");
-    for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], textX, textY + i * 24);
+    for (let i = 0; i < 24; i++) {
+        const angleRad = (Math.PI / 12) * (i - 6);
+        const x = (c * 0.84) * Math.cos(angleRad) + c;
+        const y = (c * 0.84) * Math.sin(angleRad) + c;
+        const txtX = (c * 0.9) * Math.cos(angleRad) + c;
+        const txtY = (c * 0.9) * Math.sin(angleRad) + c;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(c, c);
+        ctx.closePath();
+        ctx.strokeStyle = ctx.fillStyle = '#000';
+        ctx.font = '18px din-condensed';
+        ctx.stroke();
+        ctx.fillText(String(i) + '時', txtX, txtY + 6);
     }
-  });
+
+    ctx.save();
+    for (let i = 0; i < 1440; i++) {
+        ctx.beginPath();
+        ctx.arc(c, c, r, (Math.PI * 2 / 1440) * i - Math.PI / 2, (Math.PI * 2 / 1440) * (i + 1) - Math.PI / 2, false);
+        ctx.lineTo(c, c);
+        ctx.closePath();
+        ctx.strokeStyle = ctx.fillStyle = data[i];
+        ctx.fill();
+        ctx.stroke();
+
+
+    }
+
+    // ★★★ ここから変更 ★★★
+    ctx.strokeStyle = '#333333'; // 区切り線の色
+    ctx.lineWidth = 1; // 区切り線の太さ
+    schedule.forEach(item => {
+        let endMinutes = Math.floor(item[1]) * 60 + Math.round((item[1] % 1) * 60);
+        let endAngle = (Math.PI * 2 / 1440) * endMinutes - Math.PI / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(c, c);
+        ctx.lineTo(c + r * Math.cos(endAngle), c + r * Math.sin(endAngle));
+        ctx.stroke();
+    });
+
+
+
+    schedule.forEach(item => {
+        let startMinutes = Math.floor(item[0]) * 60 + Math.round((item[0] % 1) * 60);
+        let endMinutes = Math.floor(item[1]) * 60 + Math.round((item[1] % 1) * 60);
+
+        let startAngle = (Math.PI * 2 / 1440) * startMinutes - Math.PI / 2;
+        let endAngle = (Math.PI * 2 / 1440) * endMinutes - Math.PI / 2;
+
+        let angleDiff = endAngle - startAngle;
+        if (angleDiff < 0) {
+            angleDiff += 2 * Math.PI;
+        }
+
+        let midAngle = startAngle + angleDiff / 2;
+
+        let textRadius = r * 0.8;
+        if (Math.cos(midAngle) < 0) {
+            textRadius *= 1;
+        }
+
+        const textX = c + textRadius * Math.cos(midAngle);
+        const textY = c + textRadius * Math.sin(midAngle);
+
+        ctx.fillStyle = '#000';
+        ctx.font = '24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const lines = item[3].split("<br>");
+        for (let i = 0; i < lines.length; i++) {
+            ctx.fillText(lines[i], textX, textY + i * 24);
+        }
+    });
+
+    // 色ごとの時間を計算
+    const colorTimes = calculateTimeByColor(schedule);
+
+    // 集計結果を描画
+    drawColorSummary(ctx, colorTimes, 1450, 1300); // 右下あたりに配置
 }
 
 drawPi(ctx, gWidth, gCenter, gRadius, schedule);
