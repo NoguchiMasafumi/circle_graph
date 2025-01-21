@@ -116,7 +116,7 @@ function drawPi(ctx, w, c, r, schedule) {
         const txtX = (c * 0.9) * Math.cos(angleRad) + c;
         const txtY = (c * 0.9) * Math.sin(angleRad) + c;
         ctx.beginPath();
-        ctx.moveTo(x, y);
+        ctx.moveTo(x-10, y);
         ctx.lineTo(c, c);
         ctx.closePath();
         ctx.strokeStyle = ctx.fillStyle = '#000';
