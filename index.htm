@@ -79,6 +79,7 @@ function formatDurationWithH(start, end) {
     if (duration < 0) {
         duration += 24;
     }
+    duration = Math.round(duration * 10) / 10;
     return duration + "H";
 }
 
