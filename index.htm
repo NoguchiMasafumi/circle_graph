@@ -194,7 +194,7 @@ function drawPi(ctx, w, c, r, schedule) {
 
         const lines = item[3].split("<br>");
         for (let i = 0; i < lines.length; i++) {
-            ctx.fillText(lines[i], textX, textY + i * 24);
+            ctx.fillText(lines[i], textX, textY - 10 + i * 24);
         }
     });
 
