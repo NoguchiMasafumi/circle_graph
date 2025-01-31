@@ -10,7 +10,7 @@
 </head>
 <body>
 <canvas id="js-graph" class="graph"></canvas>
-<div id="links-container" style="position: absolute; top: 30px; left: 800px;font-size:8px;"></div> <!-- リンクコンテナを追加 -->
+<div id="links-container" style="position: absolute; top: 30px; left: 800px;font-size:10px;"></div> <!-- リンクコンテナを追加 -->
 <script>
 const graph = document.getElementById('js-graph');
 const ctx = graph.getContext('2d');
@@ -221,7 +221,6 @@ function displayLinks() {
     ar_tgt.forEach(item => {
         const link = document.createElement('a');
         link.href = `https://circle-graph.netlify.app/index3.htm?charge=${item}`;
-        link.target = '_blank';
         link.textContent = item;
         linksContainer.appendChild(link);
         linksContainer.appendChild(document.createElement('br'));
