@@ -10,6 +10,7 @@
 </head>
 <body>
 <canvas id="js-graph" class="graph"></canvas>
+<div id="links-container" style="position: absolute; top: 30px; left: 800px;font-size:10px;"></div> <!-- リンクコンテナを追加 -->
 <script>
 const graph = document.getElementById('js-graph');
 const ctx = graph.getContext('2d');
@@ -25,7 +26,7 @@ function getUrlParameter(name) {
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
     var results = regex.exec(location.search);
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-};
+}
 
 // JSONファイルを読み込む関数
 function loadSchedule(charge, callback) {
@@ -81,10 +82,6 @@ function drawColorSummary(ctx, colorTimes, x, y) {
         currentY += 40;
     }
 }
-
-
-
-
 
 function formatDurationWithH(start, end) {
     let duration = end - start;
@@ -146,8 +143,6 @@ function drawPi(ctx, w, c, r, schedule) {
         ctx.strokeStyle = ctx.fillStyle = data[i];
         ctx.fill();
         ctx.stroke();
-
-
     }
 
     // ★★★ ここから変更 ★★★
@@ -162,8 +157,6 @@ function drawPi(ctx, w, c, r, schedule) {
         ctx.lineTo(c + r * Math.cos(endAngle), c + r * Math.sin(endAngle));
         ctx.stroke();
     });
-
-
 
     schedule.forEach(item => {
         let startMinutes = Math.floor(item[0]) * 60 + Math.round((item[0] % 1) * 60);
@@ -220,6 +213,22 @@ if (charge) {
     });
 } else {
 }
+
+// リンクを表示する関数
+function displayLinks() {
+    const ar_tgt = ["hikari_07", "hikari_08", "hikari_09", "hikari_10", "hikari_11", "hikari_12", "hikari_13", "hikari_14", "hikari_15", "hikari_18", "hikari_19", "masafumi_49"];
+    const linksContainer = document.getElementById('links-container');
+    ar_tgt.forEach(item => {
+        const link = document.createElement('a');
+        link.href = `https://circle-graph.netlify.app/index3.htm?charge=${item}`;
+        link.textContent = item;
+        linksContainer.appendChild(link);
+        linksContainer.appendChild(document.createElement('br'));
+    });
+}
+
+// ページロード時にリンクを表示
+window.onload = displayLinks;
 </script>
 </body>
 </html>
